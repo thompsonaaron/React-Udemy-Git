@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Person from './Person/Person';
+import styles from './App.module.css';
 
 class App extends Component {
   state = {
@@ -12,18 +13,6 @@ class App extends Component {
     showPersons: false
   }
 
-  // switchNameHandler = (newName) => {
-  //   // console.log('Was clicked!');
-  //   // DON'T DO THIS: this.state.persons[0].name = 'Maximilian';
-  //   this.setState({
-  //     persons: [
-  //       { name: newName, age: 28 },
-  //       { name: 'Manu', age: 29 },
-  //       { name: 'Stephanie', age: 27 }
-  //     ]
-  //   })
-  // }
-
   deletePersonHandler = (personIndex) => {
     // always create a copy first, then mutate rather than modifying the original outside of the setState function
     const persons = [...this.state.persons];
@@ -34,7 +23,7 @@ class App extends Component {
 
   nameChangedHandler = (event, id) => {
     const personIndex = this.state.persons.findIndex(p => {
-      return p.id === id;
+      return p.userId === id; //changed
     });
 
     const person = { // creates a copy
@@ -46,7 +35,8 @@ class App extends Component {
     persons[personIndex] = person;
 
     this.setState({
-      persons: persons})
+      persons: persons
+    })
   };
 
   togglePersonsHandler = () => {
@@ -55,22 +45,15 @@ class App extends Component {
   }
 
   render() {
-    const style = {
-      backgroundColor: 'white',
-      font: 'inherit',
-      border: '1px solid blue',
-      padding: '8px',
-      cursor: 'pointer'
-    };
-
     let persons = null;
+    let btnClass = '';
 
     if (this.state.showPersons) {
       persons = (
         <div>
           {this.state.persons.map((person, index) => { /* iterates on objects in an array*/
             return <Person
-              click={ () => this.deletePersonHandler(index) }
+              click={() => this.deletePersonHandler(index)}
               name={person.name}
               age={person.age}
               key={person.id} // keys are required to help improve efficiency when React compares virtual DOM to real DOM
@@ -79,25 +62,27 @@ class App extends Component {
         </div>
       );
 
-      style.backgroundColor = 'orange'; 
+      btnClass = styles.Red;
     }
+
 
     let classes = []; // dynamically add styles
-    if (this.state.persons.length <= 2){
+    if (this.state.persons.length <= 2) {
       classes.push('red');
     }
-    if (this.state.persons.length <= 1){
+    if (this.state.persons.length <= 1) {
       classes.push('bold');
     }
-    
+
 
     return (
-      <div className="App">
+      <div className={styles.App}>
         <h1>Hi, I'm a React App</h1>
         <p className={classes.join(' ')}>This is really working!</p>
         <button
-          style={style}
-          onClick={() => this.togglePersonsHandler()}>Toggle Person</button>
+        className = {btnClass}
+          onClick={() => this.togglePersonsHandler()}>Toggle Person
+        </button>
         {persons}
       </div>
     );
