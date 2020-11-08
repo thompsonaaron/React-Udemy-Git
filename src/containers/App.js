@@ -4,6 +4,9 @@ import Persons from '../Components/Persons/Persons';
 import styles from './App.module.css';
 // import ErrorBoundary from './ErrorBoundary/ErrorBoundary';
 import Cockpit from '../Components/CockPit/Cockpit';
+import WithClass from '../hoc/WithClass';
+//import Auxiliary from '../hoc/Auxiliary';
+import AuthContext from '../context/auth-context';
 
 class App extends Component {
   state = {
@@ -12,17 +15,19 @@ class App extends Component {
       { id: "2", name: 'Manu', age: 29 },
       { id: "3", name: 'Stephanie', age: 26 }
     ],
-    showPersons: false
+    showPersons: false,
+    changeCounter: 0,
+    authenticated: false
   }
 
-// static getDerivedStateFromProps (props, state){
-//   console.log('[App.js] getDerivedStateFromProps', props);
-//   return state;
-// }
+  // static getDerivedStateFromProps (props, state){
+  //   console.log('[App.js] getDerivedStateFromProps', props);
+  //   return state;
+  // }
 
-// componentDidMount(){
-//   console.log('[App.js] componentDidMount');
-// }
+  // componentDidMount(){
+  //   console.log('[App.js] componentDidMount');
+  // }
 
   deletePersonHandler = (personIndex) => {
     // always create a copy first, then mutate rather than modifying the original outside of the setState function
@@ -45,8 +50,13 @@ class App extends Component {
     const persons = [...this.state.persons];
     persons[personIndex] = person;
 
-    this.setState({
-      persons: persons
+    // optional function format guarantees that new state is accurate b/c it saves prevState before each calculation
+    // this is preferred whenever something depends on the old statenp
+    this.setState((prevState, props) => {
+      return {
+        persons: persons,
+        changeCounter: this.state.changeCounter + 1
+      }
     })
   };
 
@@ -55,24 +65,31 @@ class App extends Component {
     this.setState({ showPersons: !doesShow })
   }
 
+  loginHandler = () => {
+    this.setState({ authenticated: true })
+  }
+
   render() {
     let persons = null;
 
     if (this.state.showPersons) {
-      persons = <Persons 
-          persons = {this.state.persons}
-          click={this.deletePersonHandler}
-          changed={this.nameChangedHandler} />
+      persons = <Persons
+        isAuthenticated={this.state.authenticated}
+        persons={this.state.persons}
+        click={this.deletePersonHandler}
+        changed={this.nameChangedHandler} />
     }
 
     return (
-      <div className={styles.App}>
-        <Cockpit 
-        showPersons = {this.state.showPersons} 
-        personsLength={this.state.persons.length}
-        click={this.togglePersonsHandler}/>
-        {persons}
-      </div>
+      <WithClass className={styles.App}>
+        <AuthContext.Provider value={{authenticated: this.state.authenticated, login: this.loginHandler}}>
+          <Cockpit
+            showPersons={this.state.showPersons}
+            personsLength={this.state.persons.length}
+            click={this.togglePersonsHandler} />
+          {persons}
+        </AuthContext.Provider>
+      </WithClass>
     );
   }
 }
